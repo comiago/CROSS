@@ -23,6 +23,7 @@ public class ClientHandler implements Runnable {
             // Ascolto continuo dei messaggi del client
             while ((message = in.readLine()) != null) {
                 System.out.println("Ricevuto dal client: " + message);
+                out.println(message);
                 
             }
 

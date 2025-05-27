@@ -4,50 +4,66 @@ import model.ClientConfig;
 import util.ConfigFileManager;
 import util.Colors;
 import java.io.*;
-import java.net.Socket;
 import java.util.Scanner;
 
 public class ClientMain {
     private static ClientConfig config = null;
-    private static Socket socket = null;
-    private static BufferedReader in = null;
-    private static PrintWriter out = null;
     private static String user = "user";
+    private static Network network;
+    private static Listener listenerThread;
+    private static final Object consoleLock = new Object();
 
     public static void main(String[] args) {
-        // Hook per la chiusura ordinata (CTRL+C)
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            closeSocket();
-            System.out.println("Applicazione interrotta.");
+            network.close();
+            System.out.println("\nApplicazione interrotta.");
         }));
 
         try {
-            // Caricamento della configurazione
             config = ConfigFileManager.loadConfig("src/client/client.config", ClientConfig.class);
             System.out.println("Loaded config for client: " + config);
 
-            // Inizializzazione del socket
-            socket = new Socket(config.getServerAddress(), config.getServerPort());
-            System.out.println("Connessione stabilita con " + config.getServerAddress() + ":" + config.getServerPort());
+            String address = config.getServerAddress();
+            int port = config.getServerPort();
+            network = new Network(address, port);
 
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+            listenerThread = new Listener(network, new Listener.MessageHandler() {
+                @Override
+                public void handleMessage(String message) {
+                    synchronized (consoleLock) {
+                        // Cancella la riga corrente e stampa il messaggio
+                        System.out.print("\r" + Colors.GREEN + "[SERVER] " + message + Colors.RESET + "\n");
+
+                        // Ripristina la prompt
+                        printPrompt();
+                    }
+                }
+            });
+            listenerThread.start();
 
             startUserShell();
-        } catch (IOException e) {
-            System.err.println("Errore durante la connessione o I/O: " + e.getMessage());
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException | IOException e) {
             System.err.println("Errore durante il caricamento della configurazione: " + e.getMessage());
         } finally {
-            closeSocket(); // Mi assicuro che il socket venga chiuso anche senza SIGINT
+            if (network != null) {
+                network.close();
+            }
         }
+    }
+
+    private static void printPrompt() {
+        System.out.print(Colors.BLUE + "$" + user + " > " + Colors.RESET);
+        System.out.flush();
     }
 
     private static void startUserShell() {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.print(Colors.BLUE + "$" + user + " > ");
+            synchronized (consoleLock) {
+                printPrompt();
+            }
+
             String message = scanner.nextLine();
 
             if ("exit".equalsIgnoreCase(message)) {
@@ -55,29 +71,10 @@ public class ClientMain {
                 break;
             }
 
-            out.println(message);
-
-            try {
-                String response = in.readLine();
-                if (response != null) {
-                    System.out.println("Server: " + response);
-                }
-            } catch (IOException e) {
-                System.err.println("Errore nella lettura della risposta del server: " + e.getMessage());
-                break;
+            if (!message.trim().isEmpty()) {
+                network.sendMessage(message);
             }
         }
         scanner.close();
-    }
-
-    private static void closeSocket() {
-        if (socket != null && !socket.isClosed()) {
-            try {
-                System.out.println("Chiusura della connessione...");
-                socket.close();
-            } catch (IOException e) {
-                System.err.println("Errore durante la chiusura del socket: " + e.getMessage());
-            }
-        }
     }
 }

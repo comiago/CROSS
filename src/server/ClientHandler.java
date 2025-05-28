@@ -3,39 +3,63 @@ package server;
 import java.io.*;
 import java.net.Socket;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ClientHandler implements Runnable {
     private final Socket clientSocket;
+    private static RequestController controller;
+    private static Network network;
 
-    public ClientHandler(Socket clientSocket) {
+    public ClientHandler(Network network, Socket clientSocket) {
         this.clientSocket = clientSocket;
+        network = network;
+        controller = new RequestController(network);
     }
 
     @Override
     public void run() {
-        System.out.println("Handler avviato per " + clientSocket.getInetAddress());
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-        try (
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
-        ) {
-            String message;
-
-            // Ascolto continuo dei messaggi del client
-            while ((message = in.readLine()) != null) {
-                System.out.println("Ricevuto dal client: " + message);
-                out.println(message);
-                
+            String rawMessage;
+            while ((rawMessage = in.readLine()) != null) {
+                try {
+                    JSONObject request = new JSONObject(rawMessage);
+                    JSONObject response = processRequest(request); // Nuovo metodo
+                    out.println(response.toString());
+                } catch (JSONException e) {
+                    network.sendError(out, 103, "Formato JSON non valido");
+                }
             }
-
         } catch (IOException e) {
-            System.err.println("Errore nella comunicazione con il client: " + e.getMessage());
+            System.err.println("Errore di comunicazione: " + e.getMessage());
         } finally {
             try {
                 clientSocket.close();
-                System.out.println("Connessione con il client chiusa.");
             } catch (IOException e) {
-                System.err.println("Errore nella chiusura della connessione: " + e.getMessage());
+                System.err.println("Errore chiusura socket: " + e.getMessage());
             }
         }
+    }
+
+    private JSONObject processRequest(JSONObject request) {
+        JSONObject response = new JSONObject();
+        try {
+            String operation = request.getString("operation");
+            JSONObject values = request.getJSONObject("values");
+
+            switch (operation) {
+                case "register":
+                    response = controller.handleRegister(values);
+                    break;
+                // Aggiungi altri casi qui...
+                default:
+                    network.sendError(response, 103, "Operazione non supportata");
+            }
+        } catch (JSONException e) {
+            network.sendError(response, 103, "Campi mancanti nel JSON");
+        }
+        return response;
     }
 }

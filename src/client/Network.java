@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import org.json.JSONObject;
 
 public class Network {
     private Socket socket;
@@ -25,8 +26,9 @@ public class Network {
         }
     }
 
-    public void sendMessage(String message) {
-        out.println(message);
+    public void sendJsonRequest(JSONObject request) throws IOException {
+        String jsonString = request.toString();
+        out.println(jsonString);
     }
 
     public String readMessage() throws IOException {

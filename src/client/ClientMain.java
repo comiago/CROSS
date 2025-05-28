@@ -5,6 +5,7 @@ import util.ConfigFileManager;
 import util.Colors;
 import java.io.*;
 import java.util.Scanner;
+import org.json.JSONObject;
 
 public class ClientMain {
     private static ClientConfig config = null;
@@ -12,6 +13,7 @@ public class ClientMain {
     private static Network network;
     private static Listener listenerThread;
     private static final Object consoleLock = new Object();
+    private static volatile boolean running = true;
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -33,7 +35,6 @@ public class ClientMain {
                     synchronized (consoleLock) {
                         // Cancella la riga corrente e stampa il messaggio
                         System.out.print("\r" + Colors.GREEN + "[SERVER] " + message + Colors.RESET + "\n");
-
                         // Ripristina la prompt
                         printPrompt();
                     }
@@ -59,21 +60,21 @@ public class ClientMain {
     private static void startUserShell() {
         Scanner scanner = new Scanner(System.in);
 
-        while (true) {
+        while (running) {
             synchronized (consoleLock) {
                 printPrompt();
             }
 
-            String message = scanner.nextLine();
-
-            if ("exit".equalsIgnoreCase(message)) {
-                System.out.println("Chiusura client...");
-                break;
+            String input = scanner.nextLine();
+            try {
+                JSONObject request = CommandHandler.parseCommand(input);
+                network.sendJsonRequest(request);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Errore: " + e.getMessage());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
-            if (!message.trim().isEmpty()) {
-                network.sendMessage(message);
-            }
         }
         scanner.close();
     }

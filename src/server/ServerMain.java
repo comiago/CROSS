@@ -1,10 +1,13 @@
 package server;
 
 import model.ServerConfig;
+import model.Client;
 import util.ConfigFileManager;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,6 +15,7 @@ import java.util.concurrent.Executors;
 public class ServerMain {
     private static ExecutorService threadPool;
     private static Network network;
+    private static List<Client> clients = new ArrayList<>();
 
     public static void main(String[] args) {
         // Hook per la chiusura ordinata (CTRL+C)
@@ -36,7 +40,10 @@ public class ServerMain {
             // Loop principale per accettare connessioni
             while (true) {
                 Socket clientSocket = network.accept();
-                threadPool.execute(new ClientHandler(network, clientSocket));
+                Client client = new Client(clients.size(), clientSocket);
+                clients.add(client);
+                ClientHandler clientHandler = new ClientHandler(network, clientSocket, client);
+                threadPool.execute(clientHandler);
             }
 
         } catch (IOException | IllegalAccessException | InstantiationException e) {
@@ -46,7 +53,6 @@ public class ServerMain {
             if (threadPool != null && !threadPool.isShutdown()) {
                 threadPool.shutdown();
             }
-
         }
     }
 }

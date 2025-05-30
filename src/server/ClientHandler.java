@@ -2,7 +2,9 @@ package server;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
+import model.Client;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,11 +12,13 @@ public class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private static RequestController controller;
     private static Network network;
+    private static Client client;
 
-    public ClientHandler(Network network, Socket clientSocket) {
+    public ClientHandler(Network network, Socket clientSocket, Client client) {
         this.clientSocket = clientSocket;
         network = network;
         controller = new RequestController(network);
+        client = client;
     }
 
     @Override
@@ -29,7 +33,7 @@ public class ClientHandler implements Runnable {
                     JSONObject response = processRequest(request); // Nuovo metodo
                     out.println(response.toString());
                 } catch (JSONException e) {
-                    network.sendError(out, 103, "Formato JSON non valido");
+                    network.sendMessage(out, 103, "Formato JSON non valido");
                 }
             }
         } catch (IOException e) {
@@ -50,15 +54,23 @@ public class ClientHandler implements Runnable {
             JSONObject values = request.getJSONObject("values");
 
             switch (operation) {
+                case "help":
+                    response = controller.handleHelp(values);
+                    break;
                 case "register":
                     response = controller.handleRegister(values);
                     break;
+                case "udpConnection":
+                    response = controller.handleUdpConnection(client, values);
+                    break;
                 // Aggiungi altri casi qui...
-                default:
-                    network.sendError(response, 103, "Operazione non supportata");
+                default: 
+                    network.sendMessage(response, 103, "Operazione non supportata");
             }
         } catch (JSONException e) {
-            network.sendError(response, 103, "Campi mancanti nel JSON");
+            network.sendMessage(response, 103, "Campi mancanti nel JSON");
+        } catch (SocketException e) {
+            network.sendMessage(response, 101, "Errore di connessione UDP");
         }
         return response;
     }

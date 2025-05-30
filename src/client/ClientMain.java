@@ -14,6 +14,7 @@ public class ClientMain {
     private static Listener listenerThread;
     private static final Object consoleLock = new Object();
     private static volatile boolean running = true;
+    private static CommandHandler handler;
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -28,16 +29,19 @@ public class ClientMain {
             String address = config.getServerAddress();
             int port = config.getServerPort();
             network = new Network(address, port);
+            handler = new CommandHandler();
 
-            listenerThread = new Listener(network, new Listener.MessageHandler() {
-                @Override
-                public void handleMessage(String message) {
-                    synchronized (consoleLock) {
-                        // Cancella la riga corrente e stampa il messaggio
-                        System.out.print("\r" + Colors.GREEN + "[SERVER] " + message + Colors.RESET + "\n");
-                        // Ripristina la prompt
-                        printPrompt();
-                    }
+            listenerThread = new Listener(network, message -> {
+                synchronized (consoleLock) {
+                    if(message.has("response")) {
+                        if(message.get("response").equals(100)) {
+                            System.out.print("\r" + Colors.GREEN + "[SERVER] " + message.get("errorMessage") + Colors.RESET + "\n");
+                        } else {
+                            System.out.print("\r" + Colors.RED + "[SERVER] " + message.get("errorMessage") + Colors.RESET + "\n");
+                        }
+                    } else if(message.has("response")) {}
+                    // Ripristina la prompt
+                    printPrompt();
                 }
             });
             listenerThread.start();
@@ -67,10 +71,13 @@ public class ClientMain {
 
             String input = scanner.nextLine();
             try {
-                JSONObject request = CommandHandler.parseCommand(input);
+                JSONObject request = handler.parseCommand(input);
                 network.sendJsonRequest(request);
             } catch (IllegalArgumentException e) {
-                System.err.println("Errore: " + e.getMessage());
+                synchronized (consoleLock) {
+                    // Cancella la riga corrente e stampa il messaggio
+                    System.out.print("\r" + Colors.RED + "[ERROR] " + e.getMessage() + Colors.RESET + "\n");
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

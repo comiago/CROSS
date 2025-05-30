@@ -9,6 +9,15 @@ public class CommandHandler {
         JSONObject values = new JSONObject();
 
         switch (parts[0]) {
+            case "help":
+                if (parts.length > 1) {
+                    request.put("operation", "help");
+                    values.put("command", parts[1]);
+                    break;
+                } else {
+                    request.put("operation", "help");
+                }
+                break;
             case "register":
                 if (parts.length != 3) throw new IllegalArgumentException("Formato: register <username> <password>");
                 request.put("operation", "register");

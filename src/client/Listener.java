@@ -1,14 +1,17 @@
 package client;
 
+import util.MessageBuilder;
+import org.json.JSONObject;
 import java.io.IOException;
 
 public class Listener extends Thread {
     private final Network network;
     private final MessageHandler messageHandler;
     private volatile boolean running = true;
+    private static MessageBuilder msgBuilder = new MessageBuilder();
 
     public interface MessageHandler {
-        void handleMessage(String message);
+        void handleMessage(JSONObject message);
     }
 
     public Listener(Network network, MessageHandler handler) {
@@ -20,17 +23,17 @@ public class Listener extends Thread {
     public void run() {
         try {
             while (running && network.isConnected()) {
-                String response = network.readMessage();
+                JSONObject response = network.readJsonResponse();
                 if (response == null) {
                     // Connessione chiusa dal server
-                    messageHandler.handleMessage("[SERVER] Connessione chiusa dal server");
+                    messageHandler.handleMessage(msgBuilder.makeMessage("SERVER", "Connessione chiusa dal server"));
                     break;
                 }
                 messageHandler.handleMessage(response);
             }
         } catch (IOException e) {
             if (running) {
-                messageHandler.handleMessage("[ERR] Connessione con il server interrotta: " + e.getMessage());
+                messageHandler.handleMessage(msgBuilder.makeMessage("[ERROR]",  "Connessione con il server interrotta: " + e.getMessage()));
             }
         } finally {
             stopListening();

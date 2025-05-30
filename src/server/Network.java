@@ -32,14 +32,14 @@ public class Network {
         }
     }
 
-    public void sendError(PrintWriter out, int code, String message) {
+    public void sendMessage(PrintWriter out, int code, String message) {
         JSONObject error = new JSONObject();
         error.put("response", code);
         error.put("errorMessage", message);
         out.println(error.toString());
     }
 
-    public void sendError(JSONObject response, int code, String message) {
+    public void sendMessage(JSONObject response, int code, String message) {
         response.put("response", code);
         response.put("errorMessage", message);
     }

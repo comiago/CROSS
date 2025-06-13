@@ -3,9 +3,11 @@ package client;
 import model.ClientConfig;
 import util.ConfigFileManager;
 import util.Colors;
+
 import java.io.*;
 import java.util.Scanner;
-import org.json.JSONObject;
+
+import com.google.gson.JsonObject;
 
 public class ClientMain {
     private static ClientConfig config = null;
@@ -33,15 +35,17 @@ public class ClientMain {
 
             listenerThread = new Listener(network, message -> {
                 synchronized (consoleLock) {
-                    if(message.has("response")) {
-                        if(message.get("response").equals(100)) {
-                            System.out.print("\r" + Colors.GREEN + "[SERVER] " + message.get("errorMessage") + Colors.RESET + "\n");
+                    if (message.has("response")) {
+                        int response = message.get("response").getAsInt();
+                        String errorMessage = message.get("errorMessage").getAsString();
+                        if (response == 100) {
+                            System.out.print("\r" + Colors.GREEN + "[SERVER] " + errorMessage + Colors.RESET + "\n");
                         } else {
-                            System.out.print("\r" + Colors.RED + "[SERVER] " + message.get("errorMessage") + Colors.RESET + "\n");
+                            System.out.print("\r" + Colors.RED + "[SERVER] " + errorMessage + Colors.RESET + "\n");
                         }
-                    } else if(message.has("response")) {}
-                    // Ripristina la prompt
-                    printPrompt();
+                        // Ripristina la prompt
+                        printPrompt();
+                    }
                 }
             });
             listenerThread.start();
@@ -71,11 +75,10 @@ public class ClientMain {
 
             String input = scanner.nextLine();
             try {
-                JSONObject request = handler.parseCommand(input);
+                JsonObject request = handler.parseCommand(input);
                 network.sendJsonRequest(request);
             } catch (IllegalArgumentException e) {
                 synchronized (consoleLock) {
-                    // Cancella la riga corrente e stampa il messaggio
                     System.out.print("\r" + Colors.RED + "[ERROR] " + e.getMessage() + Colors.RESET + "\n");
                 }
             } catch (IOException e) {

@@ -1,36 +1,53 @@
 package client;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
+import util.Hash;
 
 public class CommandHandler {
-    public static JSONObject parseCommand(String input) throws IllegalArgumentException {
+    public static JsonObject parseCommand(String input) throws IllegalArgumentException {
         String[] parts = input.split(" ");
-        JSONObject request = new JSONObject();
-        JSONObject values = new JSONObject();
+        JsonObject request = new JsonObject();
+        JsonObject values = new JsonObject();
 
         switch (parts[0]) {
             case "help":
+                request.addProperty("operation", "help");
                 if (parts.length > 1) {
-                    request.put("operation", "help");
-                    values.put("command", parts[1]);
-                    break;
-                } else {
-                    request.put("operation", "help");
+                    values.addProperty("command", parts[1]);
                 }
                 break;
+
             case "register":
                 if (parts.length != 3) throw new IllegalArgumentException("Formato: register <username> <password>");
-                request.put("operation", "register");
-                values.put("username", parts[1]);
-                values.put("password", parts[2]);
+                request.addProperty("operation", "register");
+                values.addProperty("username", parts[1]);
+                values.addProperty("password", Hash.sha256(parts[2]));
                 break;
 
-            // Aggiungi altri casi qui...
+            case "login":
+                if (parts.length != 3) throw new IllegalArgumentException("Formato: login <username> <password>");
+                request.addProperty("operation", "login");
+                values.addProperty("username", parts[1]);
+                values.addProperty("password", Hash.sha256(parts[2]));
+                break;
+
+            case "logout":
+                if (parts.length > 1) throw new IllegalArgumentException("Formato: logout");
+                request.addProperty("operation", "logout");
+                break;
+
+            case "updateCredentials":
+                if (parts.length != 4) throw new IllegalArgumentException("Formato: updateCredentials <username> <oldPassword> <newPassword>");
+                request.addProperty("operation", "updateCredentials");
+                values.addProperty("username", parts[1]);
+                values.addProperty("oldPassword", Hash.sha256(parts[2]));
+                values.addProperty("newPassword", Hash.sha256(parts[3]));
+                break;
             default:
                 throw new IllegalArgumentException("Comando non supportato");
         }
 
-        request.put("values", values);
+        request.add("values", values);
         return request;
     }
 }

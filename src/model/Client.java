@@ -1,6 +1,6 @@
 package model;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -27,7 +27,7 @@ public class Client {
         System.out.println("UDP connection established on port " + port + " from " + tcpSocket.getInetAddress().getHostAddress());
     }
 
-    public void notify(JSONObject notify) throws IOException {
+    public void notify(JsonObject notify) throws IOException {
         byte[] data = notify.toString().getBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length, udpSocket.getInetAddress(), udpSocket.getPort());
         udpSocket.send(packet);

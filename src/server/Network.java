@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.io.IOException;
 import java.net.Socket;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public class Network {
     private static ServerSocket socket;
@@ -33,15 +33,15 @@ public class Network {
     }
 
     public void sendMessage(PrintWriter out, int code, String message) {
-        JSONObject error = new JSONObject();
-        error.put("response", code);
-        error.put("errorMessage", message);
+        JsonObject error = new JsonObject();
+        error.addProperty("response", code);
+        error.addProperty("errorMessage", message);
         out.println(error.toString());
     }
 
-    public void sendMessage(JSONObject response, int code, String message) {
-        response.put("response", code);
-        response.put("errorMessage", message);
+    public void sendMessage(JsonObject response, int code, String message) {
+        response.addProperty("response", code);
+        response.addProperty("errorMessage", message);
     }
 
     public static void closeServerSocket() {

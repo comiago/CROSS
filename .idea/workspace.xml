@@ -5,21 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c76a2059-787d-4ace-a54d-583b7fd305f9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/controllers/RequestController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/controllers/UserController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/util/Hash.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/json_20250517.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/gson_2_13_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/UdpListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CROSS.iml" beforeDir="false" afterPath="$PROJECT_DIR$/CROSS.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/ClientMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/ClientMain.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/CommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/CommandHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Listener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Listener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Network.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/RequestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/RequestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/UserController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Client.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/server/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/ClientHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/Network.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/RequestController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/users.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/users.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/MessageBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/MessageBuilder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -90,7 +83,7 @@
       <module name="CROSS" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="controllers.*" />
+          <option name="PATTERN" value="controller.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -145,6 +138,7 @@
       <workItem from="1748582316693" duration="5529000" />
       <workItem from="1748940868790" duration="4465000" />
       <workItem from="1748955945309" duration="3825000" />
+      <workItem from="1749805063603" duration="5004000" />
     </task>
     <servers />
   </component>

@@ -1,35 +1,47 @@
 package model;
 
 import com.google.gson.JsonObject;
-
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.util.concurrent.locks.ReentrantLock;
+import util.MessageBuilder;
 
 public class Client {
     private final int id;
     private String username;
     private final Socket tcpSocket;
+    private InetAddress udpAddress;
+    private int udpPort;
     private DatagramSocket udpSocket;
     private final ReentrantLock lock = new ReentrantLock();
+    private MessageBuilder msgBuilder;
 
     public Client(int id, Socket socket) {
         this.id = id;
         this.username = "user" + id;
         this.tcpSocket = socket;
+        msgBuilder = new MessageBuilder();
     }
 
-    public void udpConnect(int port) throws SocketException {
-        udpSocket = new DatagramSocket(port);
-        System.out.println("UDP connection established on port " + port + " from " + tcpSocket.getInetAddress().getHostAddress());
+    public void setUdpPort(int port) {
+        this.udpPort = port;
+        this.udpAddress = InetAddress.getLoopbackAddress();
     }
 
     public void notify(JsonObject notify) throws IOException {
+        if (udpAddress == null || udpPort == 0) {
+            System.err.println("UDP client address or port not set.");
+            return;
+        }
+
         byte[] data = notify.toString().getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, udpSocket.getInetAddress(), udpSocket.getPort());
+        DatagramPacket packet = new DatagramPacket(data, data.length, udpAddress, udpPort);
+
+        // Usa un socket per l'invio (può essere condiviso tra client, o creato ogni volta)
+        if (udpSocket == null || udpSocket.isClosed()) {
+            udpSocket = new DatagramSocket(); // socket solo per invio
+        }
+
         udpSocket.send(packet);
     }
 

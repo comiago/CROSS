@@ -17,6 +17,23 @@ public class ClientMain {
     private static final Object consoleLock = new Object();
     private static volatile boolean running = true;
     private static CommandHandler handler;
+    private static UdpListener udpListener;
+
+    private static void handleMessage(JsonObject message) {
+        synchronized (consoleLock) {
+            if (message.has("response")) {
+                int response = message.get("response").getAsInt();
+                String errorMessage = message.get("errorMessage").getAsString();
+                if (response == 100) {
+                    System.out.print("\r" + Colors.GREEN + "[SERVER] " + errorMessage + Colors.RESET + "\n");
+                } else {
+                    System.out.print("\r" + Colors.RED + "[SERVER] " + errorMessage + Colors.RESET + "\n");
+                }
+                // Ripristina la prompt
+                printPrompt();
+            }
+        }
+    }
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -31,23 +48,10 @@ public class ClientMain {
             String address = config.getServerAddress();
             int port = config.getServerPort();
             network = new Network(address, port);
+            udpListener = new UdpListener(network.getUdpSocket(), ClientMain::handleMessage);
             handler = new CommandHandler();
 
-            listenerThread = new Listener(network, message -> {
-                synchronized (consoleLock) {
-                    if (message.has("response")) {
-                        int response = message.get("response").getAsInt();
-                        String errorMessage = message.get("errorMessage").getAsString();
-                        if (response == 100) {
-                            System.out.print("\r" + Colors.GREEN + "[SERVER] " + errorMessage + Colors.RESET + "\n");
-                        } else {
-                            System.out.print("\r" + Colors.RED + "[SERVER] " + errorMessage + Colors.RESET + "\n");
-                        }
-                        // Ripristina la prompt
-                        printPrompt();
-                    }
-                }
-            });
+            listenerThread = new Listener(network, ClientMain::handleMessage);
             listenerThread.start();
 
             startUserShell();

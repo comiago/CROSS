@@ -1,4 +1,4 @@
-package controllers;
+package controller;
 
 import model.Client;
 import com.google.gson.JsonObject;
@@ -153,7 +153,7 @@ public class RequestController {
         if (request.has("port") && !request.get("port").isJsonNull()) {
             port = request.get("port").getAsInt();
         }
-        client.udpConnect(port);
+        client.setUdpPort(port);
         response.addProperty("response", 100);
         response.addProperty("errorMessage", "Connessione avvenuta con successo");
         return response;

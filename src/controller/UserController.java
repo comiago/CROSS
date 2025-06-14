@@ -1,9 +1,8 @@
-package controllers;
+package controller;
 
 import com.google.gson.*;
 import java.io.*;
 import java.nio.file.*;
-import java.util.*;
 
 public class UserController {
     private static final String FILE_PATH = "src/server/users.json";

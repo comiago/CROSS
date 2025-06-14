@@ -17,6 +17,10 @@ public class MessageBuilder {
         return responseObject;
     }
 
+//    public JsonObject buildNotification(String notification, JsonObject trades) {
+//
+//    }
+
     public JsonObject makeMessage(String header, String message) {
         JsonObject jsonMessage = new JsonObject();
         jsonMessage.addProperty("header", header);

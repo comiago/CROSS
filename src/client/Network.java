@@ -38,6 +38,10 @@ public class Network {
         }
     }
 
+    public DatagramSocket getUdpSocket() {
+        return udpSocket;
+    }
+
     public void sendJsonRequest(JsonObject request) throws IOException {
         String jsonString = request.toString();
         out.println(jsonString);

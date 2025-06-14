@@ -6,7 +6,7 @@ import java.net.SocketException;
 
 import util.Colors;
 import util.MessageBuilder;
-import controllers.RequestController;
+import controller.RequestController;
 import model.Client;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

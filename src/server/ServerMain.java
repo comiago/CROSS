@@ -11,48 +11,61 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 public class ServerMain {
+
     private static ExecutorService threadPool;
     private static Network network;
-    private static List<Client> clients = new ArrayList<>();
+    private static final List<Client> clients = new ArrayList<>();
 
     public static void main(String[] args) {
-        // Hook per la chiusura ordinata (CTRL+C)
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            network.closeServerSocket();
-            System.out.println("Server interrotto.");
-        }));
+        addShutdownHook();
 
         try {
-            // Caricamento della configurazione
             ServerConfig config = ConfigFileManager.loadConfig("src/server/server.config", ServerConfig.class);
-            System.out.println("Loaded config for server: " + config);
+            System.out.println("Configurazione caricata: " + config);
 
-            int port = config.getServerPort();
-            int backlog = config.getBacklog();
-            String address = config.getServerAddress();
-            network = new Network(port, backlog, address);
+            startServer(config);
+            handleClients();
 
-            // Inizializzazione del thread pool
-            threadPool = Executors.newFixedThreadPool(config.getMaxClients());
-
-            // Loop principale per accettare connessioni
-            while (true) {
-                Socket clientSocket = network.accept();
-                Client client = new Client(clients.size(), clientSocket);
-                clients.add(client);
-                ClientHandler clientHandler = new ClientHandler(network, clientSocket, client);
-                threadPool.execute(clientHandler);
-            }
-
-        } catch (IOException | IllegalAccessException | InstantiationException e) {
+        } catch (IOException | ReflectiveOperationException e) {
             System.err.println("Errore durante l'avvio del server: " + e.getMessage());
+            e.printStackTrace();
         } finally {
-            network.closeServerSocket(); // Chiusura del server socket in caso di errore
-            if (threadPool != null && !threadPool.isShutdown()) {
-                threadPool.shutdown();
-            }
+            shutdown();
+        }
+    }
+
+    private static void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            shutdown();
+            System.out.println("Server interrotto.");
+        }));
+    }
+
+    private static void startServer(ServerConfig config) throws IOException {
+        network = new Network(config.getServerPort(), config.getBacklog(), config.getServerAddress());
+        threadPool = Executors.newFixedThreadPool(config.getMaxClients());
+        System.out.printf("Server in ascolto su %s:%d (max %d client)%n",
+                config.getServerAddress(), config.getServerPort(), config.getMaxClients());
+    }
+
+    private static void handleClients() throws IOException {
+        while (true) {
+            Socket clientSocket = network.accept();
+            Client client = new Client(clients.size(), clientSocket);
+            clients.add(client);
+
+            ClientHandler handler = new ClientHandler(network, clientSocket, client);
+            threadPool.execute(handler);
+        }
+    }
+
+    private static void shutdown() {
+        if (network != null) {
+            network.closeServerSocket();
+        }
+        if (threadPool != null && !threadPool.isShutdown()) {
+            threadPool.shutdown();
         }
     }
 }

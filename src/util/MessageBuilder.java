@@ -3,6 +3,8 @@ package util;
 import com.google.gson.JsonObject;
 
 public class MessageBuilder {
+
+    // Costruisce una richiesta JSON con operation e valori associati
     public JsonObject buildRequest(String operation, JsonObject values) {
         JsonObject requestObject = new JsonObject();
         requestObject.addProperty("operation", operation);
@@ -10,17 +12,23 @@ public class MessageBuilder {
         return requestObject;
     }
 
-    public JsonObject buildResponse(int response, String errorMessage) {
+    // Costruisce una risposta JSON con codice e messaggio di errore (o info)
+    public JsonObject buildResponse(int responseCode, String errorMessage) {
         JsonObject responseObject = new JsonObject();
-        responseObject.addProperty("response", response);
+        responseObject.addProperty("response", responseCode);
         responseObject.addProperty("errorMessage", errorMessage);
         return responseObject;
     }
 
-//    public JsonObject buildNotification(String notification, JsonObject trades) {
-//
-//    }
+    // Metodo per costruire una notifica (da implementare secondo necessità)
+    // public JsonObject buildNotification(String notification, JsonObject trades) {
+    //     JsonObject notificationObject = new JsonObject();
+    //     notificationObject.addProperty("notification", notification);
+    //     notificationObject.add("trades", trades);
+    //     return notificationObject;
+    // }
 
+    // Metodo generico per costruire messaggi con header e messaggio
     public JsonObject makeMessage(String header, String message) {
         JsonObject jsonMessage = new JsonObject();
         jsonMessage.addProperty("header", header);

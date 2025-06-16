@@ -34,20 +34,25 @@ public class UdpListener extends Thread {
                     JsonObject json = JsonParser.parseString(msg).getAsJsonObject();
                     handler.handleMessage(json);
                 } catch (Exception e) {
+                    // Messaggio UDP non valido JSON
                     handler.handleMessage(msgBuilder.makeMessage("[UDP-ERROR]", "Messaggio UDP malformato: " + msg));
                 }
 
             } catch (IOException e) {
                 if (running) {
+                    // Errore di ricezione, solo se non stiamo stoppando il listener
                     handler.handleMessage(msgBuilder.makeMessage("[UDP-ERROR]", "Errore ricezione UDP: " + e.getMessage()));
                 }
+                // Se running è false, probabilmente abbiamo chiuso il socket intenzionalmente
             }
         }
     }
 
     public void stopListening() {
         running = false;
-        this.interrupt(); // sblocca udpSocket.receive() solo se necessario
-        udpSocket.close(); // forza la chiusura per uscire dal blocco
+        this.interrupt(); // Sblocca la receive() se bloccata
+        if (!udpSocket.isClosed()) {
+            udpSocket.close(); // Forza la chiusura del socket per uscire dal blocco
+        }
     }
 }

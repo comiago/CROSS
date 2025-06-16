@@ -5,20 +5,42 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c76a2059-787d-4ace-a54d-583b7fd305f9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/client/UdpListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/LimitOrder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/MarketOrder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/Order.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/OrderBook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/OrderType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/Side.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/StopOrder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/server/closedOrders.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/server/pendingOrders.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/ClientMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/ClientMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/CommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/CommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/Listener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Listener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Network.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controllers/RequestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/RequestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controllers/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/UdpListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/UdpListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controller/RequestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/RequestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/UserController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/ClientConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ClientConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ServerConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/server/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/ClientHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/Network.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/ServerMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/ServerMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/Colors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Colors.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/ConfigFileManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/ConfigFileManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/Hash.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Hash.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/MessageBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/MessageBuilder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExportToHTMLSettings">
+    <option name="printScope" value="4" />
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/exportToHTML" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -138,7 +160,8 @@
       <workItem from="1748582316693" duration="5529000" />
       <workItem from="1748940868790" duration="4465000" />
       <workItem from="1748955945309" duration="3825000" />
-      <workItem from="1749805063603" duration="5004000" />
+      <workItem from="1749805063603" duration="6495000" />
+      <workItem from="1750061291573" duration="5268000" />
     </task>
     <servers />
   </component>

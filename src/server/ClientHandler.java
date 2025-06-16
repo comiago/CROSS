@@ -1,31 +1,33 @@
 package server;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import controller.RequestController;
+import model.Client;
+import util.Colors;
+import util.MessageBuilder;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 
-import util.Colors;
-import util.MessageBuilder;
-import controller.RequestController;
-import model.Client;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-
 public class ClientHandler implements Runnable {
+
     private final Socket clientSocket;
-    private static RequestController controller;
-    private static Network network;
-    private static Client client;
-    private static MessageBuilder msgBuilder;
+    private final Network network;
+    private final Client client;
+    private final RequestController controller;
+    private final MessageBuilder msgBuilder;
+
     private boolean logged = false;
 
     public ClientHandler(Network network, Socket clientSocket, Client client) {
+        this.network = network;
         this.clientSocket = clientSocket;
-        ClientHandler.network = network;
-        controller = new RequestController(network);
-        ClientHandler.client = client;
-        msgBuilder = new MessageBuilder();
+        this.client = client;
+        this.controller = new RequestController(network);
+        this.msgBuilder = new MessageBuilder();
     }
 
     @Override
@@ -37,27 +39,32 @@ public class ClientHandler implements Runnable {
             while ((rawMessage = in.readLine()) != null) {
                 try {
                     JsonObject request = JsonParser.parseString(rawMessage).getAsJsonObject();
-                    System.out.print(Colors.CYAN + "[" + client.getUsername() + "]" + request.toString() + Colors.RESET + "\n");
-                    JsonObject response = processRequest(request); // Nuovo metodo
-                    System.out.print(Colors.BLUE + "[SERVER]" + response.toString() + Colors.RESET + "\n");
+                    logClientMessage(request);
+
+                    JsonObject response = processRequest(request);
+                    logServerMessage(response);
+
                     out.println(response.toString());
+
                 } catch (JsonSyntaxException e) {
-                    network.sendMessage(out, 103, "Formato JSON non valido");
+                    network.sendJsonResponse(out, 103, "Formato JSON non valido");
                 }
             }
+
         } catch (IOException e) {
-            System.err.println("Errore di comunicazione: " + e.getMessage());
+            System.err.println("Errore di comunicazione con il client: " + e.getMessage());
         } finally {
             try {
                 clientSocket.close();
             } catch (IOException e) {
-                System.err.println("Errore chiusura socket: " + e.getMessage());
+                System.err.println("Errore durante la chiusura della socket client: " + e.getMessage());
             }
         }
     }
 
     private JsonObject processRequest(JsonObject request) {
         JsonObject response = new JsonObject();
+
         try {
             String operation = request.get("operation").getAsString();
             JsonObject values = request.getAsJsonObject("values");
@@ -73,34 +80,64 @@ public class ClientHandler implements Runnable {
                     response = controller.handleRegister(values);
                     break;
                 case "login":
-                    if(logged) response = msgBuilder.buildResponse(102, "user already logged in");
-                    else response = controller.handleLogin(values);
-                    if(response.get("response").getAsInt() == 100) {
-                        logged = true;
-                        client.setUsername(values.get("username").getAsString());
-                    }
+                    response = handleLogin(values);
                     break;
                 case "logout":
-                    if(!logged) {
-                        response = msgBuilder.buildResponse(101, "user not logged in");
-                    } else {
-                        logged = false;
-                        client.setUsername("user" + client.getId());
-                        response = msgBuilder.buildResponse(100, "OK");
-                    }
+                    response = handleLogout();
                     break;
                 case "updateCredentials":
-                    if(logged) response = msgBuilder.buildResponse(104, "user currently logged in");
-                    else response = controller.handleUpdateCredentials(values);
+                    response = handleUpdateCredentials(values);
                     break;
                 default:
                     response = msgBuilder.buildResponse(103, "Operazione non supportata");
             }
+
         } catch (NullPointerException | IllegalStateException e) {
             response = msgBuilder.buildResponse(103, "Campi mancanti o malformati nel JSON");
         } catch (SocketException e) {
             response = msgBuilder.buildResponse(101, "Errore di connessione UDP");
         }
+
         return response;
+    }
+
+    private JsonObject handleLogin(JsonObject values) {
+        if (logged) {
+            return msgBuilder.buildResponse(102, "Utente già loggato");
+        }
+
+        JsonObject response = controller.handleLogin(values);
+        if (response.get("response").getAsInt() == 100) {
+            logged = true;
+            client.setUsername(values.get("username").getAsString());
+        }
+
+        return response;
+    }
+
+    private JsonObject handleLogout() {
+        if (!logged) {
+            return msgBuilder.buildResponse(101, "Utente non loggato");
+        }
+
+        logged = false;
+        client.setUsername("user" + client.getId());
+        return msgBuilder.buildResponse(100, "OK");
+    }
+
+    private JsonObject handleUpdateCredentials(JsonObject values) {
+        if (logged) {
+            return msgBuilder.buildResponse(104, "Impossibile aggiornare credenziali: utente loggato");
+        }
+
+        return controller.handleUpdateCredentials(values);
+    }
+
+    private void logClientMessage(JsonObject request) {
+        System.out.println(Colors.CYAN + "[" + client.getUsername() + "] " + request.toString() + Colors.RESET);
+    }
+
+    private void logServerMessage(JsonObject response) {
+        System.out.println(Colors.BLUE + "[SERVER] " + response.toString() + Colors.RESET);
     }
 }

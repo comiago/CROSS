@@ -1,0 +1,22 @@
+package model;
+
+/**
+ * Rappresenta un ordine di tipo LIMIT con prezzo fisso.
+ */
+public class LimitOrder extends Order {
+    private final int price;
+
+    public LimitOrder(long orderId, String username, Side side, int size, int price) {
+        super(orderId, username, side, size);
+        this.price = price;
+    }
+
+    @Override
+    public OrderType getOrderType() {
+        return OrderType.LIMIT;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+}

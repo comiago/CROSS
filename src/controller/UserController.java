@@ -5,71 +5,79 @@ import java.io.*;
 import java.nio.file.*;
 
 public class UserController {
-    private static final String FILE_PATH = "src/server/users.json";
 
-    // Carica utenti dal file
-    public static JsonObject loadUsers() {
+    private final Path filePath;
+    private final Gson gson;
+
+    public UserController() {
+        this.filePath = Paths.get("src/server/users.json");
+        this.gson = new GsonBuilder().setPrettyPrinting().create();
+    }
+
+    private synchronized JsonObject loadUsers() {
         try {
-            if (!Files.exists(Paths.get(FILE_PATH))) {
-                return new JsonObject(); // File non esiste → vuoto
+            if (!Files.exists(filePath)) {
+                return new JsonObject();
             }
-
-            String json = new String(Files.readAllBytes(Paths.get(FILE_PATH)));
+            String json = Files.readString(filePath);
             return JsonParser.parseString(json).getAsJsonObject();
         } catch (IOException | JsonSyntaxException e) {
             System.err.println("Errore nel caricamento utenti: " + e.getMessage());
-            return new JsonObject(); // fallback vuoto
+            return new JsonObject();
         }
     }
 
-    // Salva utenti nel file
-    public static void saveUsers(JsonObject users) {
-        try (FileWriter writer = new FileWriter(FILE_PATH)) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private synchronized void saveUsers(JsonObject users) {
+        try (FileWriter writer = new FileWriter(filePath.toFile())) {
             gson.toJson(users, writer);
         } catch (IOException e) {
             System.err.println("Errore nel salvataggio utenti: " + e.getMessage());
         }
     }
 
-    // Aggiunge un nuovo utente se non esiste già
-    public static boolean registerUser(String username, String password) {
+    // ⚠️ Le password sono già hashate
+    public boolean registerUser(String username, String hashedPassword) {
         JsonObject users = loadUsers();
 
         if (users.has(username)) {
-            return false; // utente già registrato
+            return false; // utente già esistente
         }
 
         JsonObject userData = new JsonObject();
-        userData.addProperty("password", password);
+        userData.addProperty("password", hashedPassword); // salva direttamente
 
         users.add(username, userData);
         saveUsers(users);
         return true;
     }
 
-    public static boolean loginUser(String username, String password) {
+    public boolean loginUser(String username, String hashedPassword) {
         JsonObject users = loadUsers();
+
         if (users.has(username)) {
             JsonObject userData = users.getAsJsonObject(username);
-            if (userData.has("password") && userData.get("password").getAsString().equals(password)) {
-                return true;
-            }
+            String stored = userData.get("password").getAsString();
+            return stored.equals(hashedPassword); // confronto diretto
         }
+
         return false;
     }
 
-    public static boolean updateCredentials(String username, String oldPassword, String newPassword) {
+    public boolean updateCredentials(String username, String oldHashed, String newHashed) {
         JsonObject users = loadUsers();
+
         if (users.has(username)) {
             JsonObject userData = users.getAsJsonObject(username);
-            if (userData.has("password") && userData.get("password").getAsString().equals(oldPassword)) {
-                userData.addProperty("password", newPassword);
+            String stored = userData.get("password").getAsString();
+
+            if (stored.equals(oldHashed)) {
+                userData.addProperty("password", newHashed);
                 users.add(username, userData);
                 saveUsers(users);
                 return true;
             }
         }
+
         return false;
     }
 }

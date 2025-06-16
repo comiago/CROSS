@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Configurazione del client: indirizzo e porta del server.
+ */
 public class ClientConfig {
     private String serverAddress;
     private int serverPort;
@@ -22,9 +25,9 @@ public class ClientConfig {
 
     @Override
     public String toString() {
-        return "Config{" +
-                "host='" + serverAddress + '\'' +
-                ", port=" + serverPort +
+        return "ClientConfig{" +
+                "serverAddress='" + serverAddress + '\'' +
+                ", serverPort=" + serverPort +
                 '}';
     }
 }

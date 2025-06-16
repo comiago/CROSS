@@ -4,7 +4,7 @@ import model.ClientConfig;
 import util.ConfigFileManager;
 import util.Colors;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Scanner;
 
 import com.google.gson.JsonObject;
@@ -29,7 +29,6 @@ public class ClientMain {
                 } else {
                     System.out.print("\r" + Colors.RED + "[SERVER] " + errorMessage + Colors.RESET + "\n");
                 }
-                // Ripristina la prompt
                 printPrompt();
             }
         }
@@ -37,7 +36,7 @@ public class ClientMain {
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            network.close();
+            if (network != null) network.close();
             System.out.println("\nApplicazione interrotta.");
         }));
 
@@ -45,22 +44,19 @@ public class ClientMain {
             config = ConfigFileManager.loadConfig("src/client/client.config", ClientConfig.class);
             System.out.println("Loaded config for client: " + config);
 
-            String address = config.getServerAddress();
-            int port = config.getServerPort();
-            network = new Network(address, port);
-            udpListener = new UdpListener(network.getUdpSocket(), ClientMain::handleMessage);
+            network = new Network(config.getServerAddress(), config.getServerPort());
             handler = new CommandHandler();
 
             listenerThread = new Listener(network, ClientMain::handleMessage);
             listenerThread.start();
 
+            udpListener = new UdpListener(network.getUdpSocket(), ClientMain::handleMessage);
+            udpListener.start();
+
             startUserShell();
-        } catch (IllegalAccessException | InstantiationException | IOException e) {
+
+        } catch (IOException | ReflectiveOperationException e) {
             System.err.println("Errore durante il caricamento della configurazione: " + e.getMessage());
-        } finally {
-            if (network != null) {
-                network.close();
-            }
         }
     }
 
@@ -70,26 +66,23 @@ public class ClientMain {
     }
 
     private static void startUserShell() {
-        Scanner scanner = new Scanner(System.in);
-
-        while (running) {
-            synchronized (consoleLock) {
-                printPrompt();
-            }
-
-            String input = scanner.nextLine();
-            try {
-                JsonObject request = handler.parseCommand(input);
-                network.sendJsonRequest(request);
-            } catch (IllegalArgumentException e) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (running) {
                 synchronized (consoleLock) {
-                    System.out.print("\r" + Colors.RED + "[ERROR] " + e.getMessage() + Colors.RESET + "\n");
+                    printPrompt();
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                String input = scanner.nextLine();
+                try {
+                    JsonObject request = handler.parseCommand(input);
+                    network.sendJsonRequest(request);
+                } catch (IllegalArgumentException e) {
+                    synchronized (consoleLock) {
+                        System.out.print("\r" + Colors.RED + "[ERROR] " + e.getMessage() + Colors.RESET + "\n");
+                    }
+                } catch (IOException e) {
+                    System.err.println("Errore invio richiesta: " + e.getMessage());
+                }
             }
-
         }
-        scanner.close();
     }
 }

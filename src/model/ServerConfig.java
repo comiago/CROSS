@@ -41,9 +41,9 @@ public class ServerConfig {
 
     @Override
     public String toString() {
-        return "Config{" +
-                "host='" + serverAddress + '\'' +
-                ", port=" + serverPort +
+        return "ServerConfig{" +
+                "serverAddress='" + serverAddress + '\'' +
+                ", serverPort=" + serverPort +
                 ", backlog=" + backlog +
                 ", maxClients=" + maxClients +
                 '}';

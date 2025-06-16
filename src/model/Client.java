@@ -14,20 +14,22 @@ public class Client {
     private int udpPort;
     private DatagramSocket udpSocket;
     private final ReentrantLock lock = new ReentrantLock();
-    private MessageBuilder msgBuilder;
+    private final MessageBuilder msgBuilder;
 
     public Client(int id, Socket socket) {
         this.id = id;
         this.username = "user" + id;
         this.tcpSocket = socket;
-        msgBuilder = new MessageBuilder();
+        this.msgBuilder = new MessageBuilder();
     }
 
     public void setUdpPort(int port) {
         this.udpPort = port;
+        // Considera se udpAddress può variare: qui è sempre loopback
         this.udpAddress = InetAddress.getLoopbackAddress();
     }
 
+    // Invia una notifica UDP al client in modo thread-safe
     public void notify(JsonObject notify) throws IOException {
         if (udpAddress == null || udpPort == 0) {
             System.err.println("UDP client address or port not set.");
@@ -37,9 +39,9 @@ public class Client {
         byte[] data = notify.toString().getBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length, udpAddress, udpPort);
 
-        // Usa un socket per l'invio (può essere condiviso tra client, o creato ogni volta)
+        // Se il socket UDP non è aperto o chiuso, lo (ri)crea
         if (udpSocket == null || udpSocket.isClosed()) {
-            udpSocket = new DatagramSocket(); // socket solo per invio
+            udpSocket = new DatagramSocket();
         }
 
         udpSocket.send(packet);
@@ -55,10 +57,6 @@ public class Client {
 
     public DatagramSocket getUdpSocket() {
         return udpSocket;
-    }
-
-    public Socket getSocket() {
-        return tcpSocket;
     }
 
     public String getUsername() {
@@ -79,6 +77,7 @@ public class Client {
         }
     }
 
+    // Esegue un'azione protetta dal lock
     public void runSafely(Runnable action) {
         lock.lock();
         try {

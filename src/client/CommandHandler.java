@@ -57,6 +57,16 @@ public class CommandHandler {
                 values.addProperty("newPassword", Hash.sha256(parts[3]));
                 break;
 
+            case "insertlimitorder":
+                if (parts.length != 4) {
+                    throw new IllegalArgumentException("Formato: insertLimitOrder <type> <size> <price>");
+                }
+                request.addProperty("operation", "insertLimitOrder");
+                values.addProperty("type", parts[1]);
+                values.addProperty("size", parts[2]);
+                values.addProperty("price", parts[3]);
+                break;
+
             default:
                 throw new IllegalArgumentException("Comando non supportato: " + parts[0]);
         }

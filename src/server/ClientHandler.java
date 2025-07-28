@@ -5,6 +5,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import controller.RequestController;
 import model.Client;
+import model.Order;
+import model.OrderBook;
 import util.Colors;
 import util.MessageBuilder;
 
@@ -19,14 +21,16 @@ public class ClientHandler implements Runnable {
     private final Client client;
     private final RequestController controller;
     private final MessageBuilder msgBuilder;
+    private static OrderBook orderBook;
 
     private boolean logged = false;
 
-    public ClientHandler(Network network, Socket clientSocket, Client client) {
+    public ClientHandler(Network network, Socket clientSocket, Client client, OrderBook orderBook) {
         this.network = network;
         this.clientSocket = clientSocket;
         this.client = client;
-        this.controller = new RequestController(network);
+        this.orderBook = orderBook;
+        this.controller = new RequestController(network, client, orderBook);
         this.msgBuilder = new MessageBuilder();
     }
 
@@ -63,7 +67,7 @@ public class ClientHandler implements Runnable {
     }
 
     private JsonObject processRequest(JsonObject request) {
-        JsonObject response = new JsonObject();
+        JsonObject response;
 
         try {
             String operation = request.get("operation").getAsString();
@@ -87,6 +91,9 @@ public class ClientHandler implements Runnable {
                     break;
                 case "updateCredentials":
                     response = handleUpdateCredentials(values);
+                    break;
+                case "insertLimitOrder":
+                    response = handleInsertLimitOrder(values);
                     break;
                 default:
                     response = msgBuilder.buildResponse(103, "Operazione non supportata");
@@ -131,6 +138,15 @@ public class ClientHandler implements Runnable {
         }
 
         return controller.handleUpdateCredentials(values);
+    }
+
+    private JsonObject handleInsertLimitOrder(JsonObject values) {
+        if (!logged) {
+            JsonObject response = new JsonObject();
+            response.addProperty("orderId", -1);
+            return response;
+        }
+        return controller.handleInsertLimitOrder(values);
     }
 
     private void logClientMessage(JsonObject request) {

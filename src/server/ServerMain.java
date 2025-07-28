@@ -1,5 +1,6 @@
 package server;
 
+import model.OrderBook;
 import model.ServerConfig;
 import model.Client;
 import util.ConfigFileManager;
@@ -16,12 +17,17 @@ public class ServerMain {
     private static ExecutorService threadPool;
     private static Network network;
     private static final List<Client> clients = new ArrayList<>();
+    private static final OrderBook orderBook = new OrderBook();
 
     public static void main(String[] args) {
+        if(args.length != 0) {
+            throw new IllegalArgumentException("Il server non accetta argomenti. Avviare senza parametri.");
+        }
+
         addShutdownHook();
 
         try {
-            ServerConfig config = ConfigFileManager.loadConfig("src/server/server.config", ServerConfig.class);
+            ServerConfig config = ConfigFileManager.loadConfig("src/config/server.config", ServerConfig.class);
             System.out.println("Configurazione caricata: " + config);
 
             startServer(config);
@@ -55,7 +61,7 @@ public class ServerMain {
             Client client = new Client(clients.size(), clientSocket);
             clients.add(client);
 
-            ClientHandler handler = new ClientHandler(network, clientSocket, client);
+            ClientHandler handler = new ClientHandler(network, clientSocket, client, orderBook);
             threadPool.execute(handler);
         }
     }

@@ -2,6 +2,9 @@ package controller;
 
 import com.google.gson.JsonObject;
 import model.Client;
+import model.LimitOrder;
+import model.OrderBook;
+import model.Side;
 import server.Network;
 import util.MessageBuilder;
 
@@ -14,6 +17,8 @@ public class RequestController {
     private final Network network;
     private static MessageBuilder msgBuilder;
     private static UserController userController;
+    private static Client client;
+    private static OrderBook orderBook;
 
     private static final Map<String, String> helpMessages = new HashMap<>();
 
@@ -28,10 +33,12 @@ public class RequestController {
         helpMessages.put("exit", "exit → Chiudi il client");
     }
 
-    public RequestController(Network network) {
+    public RequestController(Network network, Client client, OrderBook orderBook) {
         this.network = network;
         this.msgBuilder = new MessageBuilder();
         this.userController = new UserController();
+        this.client = client;
+        this.orderBook = orderBook;
     }
 
     public JsonObject handleHelp(JsonObject request) {
@@ -157,6 +164,21 @@ public class RequestController {
 
         client.setUdpPort(port);
         return msgBuilder.buildResponse(100, "Connessione avvenuta con successo");
+    }
+
+    public JsonObject handleInsertLimitOrder(JsonObject request) {
+        JsonObject response = new JsonObject();
+        long orderId = orderBook.generateOrderId();
+        LimitOrder limitOrder = new LimitOrder(
+                orderId,
+                "pippo",
+                Side.valueOf(request.get("type").getAsString()),
+                request.get("size").getAsInt(),
+                request.get("price").getAsInt()
+        );
+        orderBook.addLimitOrder(limitOrder);
+
+        return response;
     }
 
     // Utilità per estrarre valori da un JSON in sicurezza

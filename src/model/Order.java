@@ -36,6 +36,10 @@ public abstract class Order {
         return size;
     }
 
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }

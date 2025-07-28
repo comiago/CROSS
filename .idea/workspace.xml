@@ -5,33 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c76a2059-787d-4ace-a54d-583b7fd305f9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/model/LimitOrder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/MarketOrder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/Order.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/OrderBook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/OrderType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/Side.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/StopOrder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/server/closedOrders.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/server/pendingOrders.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/ClientMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/ClientMain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/CommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/CommandHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Listener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Listener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Network.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/UdpListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/UdpListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/client.config" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/client.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/controller/RequestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/RequestController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Client.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ClientConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ClientConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ServerConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Order.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/OrderBook.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/OrderBook.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/server/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/ClientHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/Network.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/server/ServerMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/ServerMain.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/Colors.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Colors.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/ConfigFileManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/ConfigFileManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/Hash.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Hash.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/MessageBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/MessageBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/server.config" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/server.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/users.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/users.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,6 +71,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\tecno\OneDrive\Desktop\università\terzo anno\laboratorio 3\CROSS\src\config" />
+    </key>
+  </component>
   <component name="RunManager" selected="Application.ClientMain">
     <configuration name="ClientMain" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="client.ClientMain" />
@@ -161,7 +151,13 @@
       <workItem from="1748940868790" duration="4465000" />
       <workItem from="1748955945309" duration="3825000" />
       <workItem from="1749805063603" duration="6495000" />
-      <workItem from="1750061291573" duration="5268000" />
+      <workItem from="1750061291573" duration="10315000" />
+      <workItem from="1750153548522" duration="1459000" />
+      <workItem from="1750167164164" duration="10756000" />
+      <workItem from="1750406692743" duration="1271000" />
+      <workItem from="1750833924033" duration="167000" />
+      <workItem from="1753434744419" duration="8000" />
+      <workItem from="1753710199099" duration="681000" />
     </task>
     <servers />
   </component>

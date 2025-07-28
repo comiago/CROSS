@@ -41,7 +41,7 @@ public class ClientMain {
         }));
 
         try {
-            config = ConfigFileManager.loadConfig("src/client/client.config", ClientConfig.class);
+            config = ConfigFileManager.loadConfig("src/config/client.config", ClientConfig.class);
             System.out.println("Loaded config for client: " + config);
 
             network = new Network(config.getServerAddress(), config.getServerPort());

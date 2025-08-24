@@ -30,6 +30,9 @@ public class ClientMain {
                     System.out.print("\r" + Colors.RED + "[SERVER] " + errorMessage + Colors.RESET + "\n");
                 }
                 printPrompt();
+            } else if(message.has("notification")){
+                String notification = message.get("notification").getAsString();
+                System.out.print("\r" + Colors.YELLOW + "[NOTIFICATION] " + notification + message.get("trades") + Colors.RESET + "\n");
             }
         }
     }

@@ -1,5 +1,5 @@
 package model;
 
 public enum Side {
-    BID, ASK
+    bid, ask
 }

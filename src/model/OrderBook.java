@@ -34,7 +34,7 @@ public class OrderBook {
      * Aggiunge un ordine limit al book.
      */
     public synchronized void addLimitOrder(LimitOrder order) {
-        TreeMap<Integer, List<LimitOrder>> bookSide = order.getSide() == Side.BID ? bids : asks;
+        TreeMap<Integer, List<LimitOrder>> bookSide = order.getSide() == Side.bid ? bids : asks;
         bookSide.computeIfAbsent(order.getPrice(), k -> new LinkedList<>()).add(order);
         allOrders.put(order.getOrderId(), order);
     }
@@ -47,7 +47,7 @@ public class OrderBook {
         if (order == null) return false;
 
         if (order instanceof LimitOrder limitOrder) {
-            TreeMap<Integer, List<LimitOrder>> bookSide = limitOrder.getSide() == Side.BID ? bids : asks;
+            TreeMap<Integer, List<LimitOrder>> bookSide = limitOrder.getSide() == Side.bid ? bids : asks;
             List<LimitOrder> ordersAtPrice = bookSide.get(limitOrder.getPrice());
 
             if (ordersAtPrice != null) {
@@ -83,5 +83,79 @@ public class OrderBook {
         return Collections.unmodifiableMap(asks);
     }
 
+    public synchronized List<ExecutedTrade> matchLimitOrder(LimitOrder newOrder) {
+        List<ExecutedTrade> trades = new ArrayList<>();
+
+        // 1. Identifica il lato opposto del book
+        TreeMap<Integer, List<LimitOrder>> oppositeBook =
+                newOrder.getSide() == Side.bid ? asks : bids;
+
+        // 2. Itera sui prezzi ordinati favorevolmente
+        Iterator<Map.Entry<Integer, List<LimitOrder>>> it = oppositeBook.entrySet().iterator();
+
+        while (it.hasNext() && newOrder.getSize() > 0) {
+            Map.Entry<Integer, List<LimitOrder>> entry = it.next();
+            int price = entry.getKey();
+
+            // 3. Verifica compatibilità prezzo (limit condition)
+            boolean isMatch = newOrder.getSide() == Side.bid
+                    ? newOrder.getPrice() >= price
+                    : newOrder.getPrice() <= price;
+
+            if (!isMatch) break; // fermati: prezzi non più compatibili
+
+            List<LimitOrder> ordersAtPrice = entry.getValue();
+            Iterator<LimitOrder> orderIt = ordersAtPrice.iterator();
+
+            // 4. Itera sugli ordini allo stesso prezzo
+            while (orderIt.hasNext() && newOrder.getSize() > 0) {
+                LimitOrder existingOrder = orderIt.next();
+
+                // 5. Calcola quanto posso scambiare
+                int matchedSize = Math.min(existingOrder.getSize(), newOrder.getSize());
+
+                // 6. Aggiorna size residue
+                existingOrder.setSize(existingOrder.getSize() - matchedSize);
+                newOrder.setSize(newOrder.getSize() - matchedSize);
+
+                // 7. Crea ExecutedTrade
+                trades.add(createTrade(newOrder, existingOrder, price, matchedSize));
+
+                // 8. Rimuovi l’ordine esistente se esaurito
+                if (existingOrder.getSize() == 0) {
+                    orderIt.remove();
+                    allOrders.remove(existingOrder.getOrderId());
+                }
+            }
+
+            // 9. Se la lista di quel prezzo è vuota, rimuovila dal book
+            if (ordersAtPrice.isEmpty()) {
+                it.remove();
+            }
+        }
+
+        // 10. Se l’ordine è ancora attivo, va aggiunto nel suo lato del book
+        if (newOrder.getSize() > 0) {
+            addLimitOrder(newOrder);
+        } else {
+            allOrders.remove(newOrder.getOrderId());
+        }
+
+        return trades;
+    }
+
+    private ExecutedTrade createTrade(Order newOrder, Order existingOrder, int price, int size) {
+        Client buyer = newOrder.getSide() == Side.bid ? newOrder.getUser() : existingOrder.getUser();
+        Client seller = newOrder.getSide() == Side.ask ? newOrder.getUser() : existingOrder.getUser();
+
+        return new ExecutedTrade(
+                buyer,
+                seller,
+                newOrder.getSide(),
+                size,
+                price,
+                System.currentTimeMillis()
+        );
+    }
 
 }

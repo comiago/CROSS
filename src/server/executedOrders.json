@@ -1,0 +1,18 @@
+[
+  {
+    "buyerName": "comiago",
+    "sellerName": "mariorossi",
+    "initiatorSide": "bid",
+    "size": 10,
+    "price": 100,
+    "timestamp": 1756033608779
+  },
+  {
+    "buyerName": "comiago",
+    "sellerName": "mariorossi",
+    "initiatorSide": "ask",
+    "size": 10,
+    "price": 50,
+    "timestamp": 1756033659264
+  }
+]

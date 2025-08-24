@@ -1,12 +1,8 @@
-[
-  {
-    "id": "9e4a08de-4c0a-446d-b3ad-bf47992043c4",
-    "username": "comiago",
+{
+  "comiago": {
     "password": "688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6"
   },
-  {
-    "id": "1b33657e-6637-4c6f-a22b-8250772c0452",
-    "username": "mariorossi",
-    "password": "489cd5dbc708c7e541de4d7cd91ce6d0f1613573b7fc5b40d3942ccb9555cf35"
+  "mariorossi": {
+    "password": "688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6"
   }
-]
+}

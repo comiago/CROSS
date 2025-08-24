@@ -20,13 +20,13 @@ public class MessageBuilder {
         return responseObject;
     }
 
-    // Metodo per costruire una notifica (da implementare secondo necessità)
-    // public JsonObject buildNotification(String notification, JsonObject trades) {
-    //     JsonObject notificationObject = new JsonObject();
-    //     notificationObject.addProperty("notification", notification);
-    //     notificationObject.add("trades", trades);
-    //     return notificationObject;
-    // }
+     // Metodo per costruire una notifica
+     public JsonObject buildNotification(String notification, JsonObject trades) {
+         JsonObject notificationObject = new JsonObject();
+         notificationObject.addProperty("notification", notification);
+         notificationObject.add("trades", trades);
+         return notificationObject;
+     }
 
     // Metodo generico per costruire messaggi con header e messaggio
     public JsonObject makeMessage(String header, String message) {

@@ -1,15 +1,15 @@
 package controller;
 
 import com.google.gson.JsonObject;
-import model.Client;
-import model.LimitOrder;
-import model.OrderBook;
-import model.Side;
+import model.*;
 import server.Network;
 import util.MessageBuilder;
+import util.OrderStorage;
 
+import java.io.IOException;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RequestController {
@@ -166,18 +166,30 @@ public class RequestController {
         return msgBuilder.buildResponse(100, "Connessione avvenuta con successo");
     }
 
-    public JsonObject handleInsertLimitOrder(JsonObject request) {
+    public JsonObject handleInsertLimitOrder(Client client, JsonObject request) throws IOException {
         JsonObject response = new JsonObject();
         long orderId = orderBook.generateOrderId();
         LimitOrder limitOrder = new LimitOrder(
                 orderId,
-                "pippo",
+                client,
                 Side.valueOf(request.get("type").getAsString()),
                 request.get("size").getAsInt(),
                 request.get("price").getAsInt()
         );
-        orderBook.addLimitOrder(limitOrder);
 
+        List<ExecutedTrade> trades = orderBook.matchLimitOrder(limitOrder);
+
+        if (!trades.isEmpty()) {
+            for (ExecutedTrade t : trades) {
+                OrderStorage.appendToExecutedOrders(t);
+                JsonObject tradesObj = new JsonObject();
+                t.getBuyer().notify(msgBuilder.buildNotification("closedTrade", tradesObj));
+                t.getSeller().notify(msgBuilder.buildNotification("closedTrade", tradesObj));
+            }
+        }
+        OrderStorage.savePendingOrders(orderBook);
+        
+        response.addProperty("orderId", orderId);
         return response;
     }
 

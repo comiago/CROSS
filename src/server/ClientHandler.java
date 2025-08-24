@@ -103,6 +103,8 @@ public class ClientHandler implements Runnable {
             response = msgBuilder.buildResponse(103, "Campi mancanti o malformati nel JSON");
         } catch (SocketException e) {
             response = msgBuilder.buildResponse(101, "Errore di connessione UDP");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         return response;
@@ -140,13 +142,13 @@ public class ClientHandler implements Runnable {
         return controller.handleUpdateCredentials(values);
     }
 
-    private JsonObject handleInsertLimitOrder(JsonObject values) {
+    private JsonObject handleInsertLimitOrder(JsonObject values) throws IOException {
         if (!logged) {
             JsonObject response = new JsonObject();
             response.addProperty("orderId", -1);
             return response;
         }
-        return controller.handleInsertLimitOrder(values);
+        return controller.handleInsertLimitOrder(client, values);
     }
 
     private void logClientMessage(JsonObject request) {

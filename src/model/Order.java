@@ -1,18 +1,21 @@
 package model;
 
+
 /**
  * Classe base astratta per rappresentare un ordine.
  */
 public abstract class Order {
     private final long orderId;
+    private final transient Client user;
     private final String username;
     private final Side side;
     private int size;
     private final long timestamp;
 
-    public Order(long orderId, String username, Side side, int size) {
+    public Order(long orderId, Client user, Side side, int size) {
         this.orderId = orderId;
-        this.username = username;
+        this.user = user;
+        this.username = user.getUsername();
         this.side = side;
         this.size = size;
         this.timestamp = System.currentTimeMillis();
@@ -24,8 +27,8 @@ public abstract class Order {
         return orderId;
     }
 
-    public String getUsername() {
-        return username;
+    public Client getUser() {
+        return user;
     }
 
     public Side getSide() {

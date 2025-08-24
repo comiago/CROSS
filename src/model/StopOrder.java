@@ -3,8 +3,8 @@ package model;
 public class StopOrder extends Order {
     private final int stopPrice;
 
-    public StopOrder(long orderId, String username, Side side, int size, int stopPrice) {
-        super(orderId, username, side, size);
+    public StopOrder(long orderId, Client client, Side side, int size, int stopPrice) {
+        super(orderId, client, side, size);
         this.stopPrice = stopPrice;
     }
 

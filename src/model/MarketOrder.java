@@ -5,8 +5,8 @@ package model;
  */
 public final class MarketOrder extends Order {
 
-    public MarketOrder(long orderId, String username, Side side, int size) {
-        super(orderId, username, side, size);
+    public MarketOrder(long orderId, Client client, Side side, int size) {
+        super(orderId, client, side, size);
     }
 
     @Override

@@ -1,18 +1,20 @@
 [
   {
-    "buyerName": "comiago",
-    "sellerName": "mariorossi",
-    "initiatorSide": "bid",
-    "size": 10,
+    "buyer": "comiago",
+    "seller": "comiago",
+    "orderType": "MARKET",
+    "initiatorSide": "ask",
+    "size": 5,
     "price": 100,
-    "timestamp": 1756033608779
+    "timestamp": 1756400374319
   },
   {
-    "buyerName": "comiago",
-    "sellerName": "mariorossi",
+    "buyer": "comiago",
+    "seller": "comiago",
+    "orderType": "MARKET",
     "initiatorSide": "ask",
-    "size": 10,
-    "price": 50,
-    "timestamp": 1756033659264
+    "size": 5,
+    "price": 100,
+    "timestamp": 1756400421413
   }
 ]

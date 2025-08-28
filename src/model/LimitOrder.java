@@ -6,7 +6,7 @@ package model;
 public class LimitOrder extends Order {
     private final int price;
 
-    public LimitOrder(long orderId, Client user, Side side, int size, int price) {
+    public LimitOrder(long orderId, String user, Side side, int size, int price) {
         super(orderId, user, side, size);
         this.price = price;
     }

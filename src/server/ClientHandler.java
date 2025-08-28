@@ -9,6 +9,7 @@ import model.Order;
 import model.OrderBook;
 import util.Colors;
 import util.MessageBuilder;
+import util.Notifier;
 
 import java.io.*;
 import java.net.Socket;
@@ -22,15 +23,17 @@ public class ClientHandler implements Runnable {
     private final RequestController controller;
     private final MessageBuilder msgBuilder;
     private static OrderBook orderBook;
+    private static Notifier notifier;
 
     private boolean logged = false;
 
-    public ClientHandler(Network network, Socket clientSocket, Client client, OrderBook orderBook) {
+    public ClientHandler(Network network, Socket clientSocket, Client client, OrderBook orderBook, Notifier notifier) {
         this.network = network;
         this.clientSocket = clientSocket;
         this.client = client;
         this.orderBook = orderBook;
-        this.controller = new RequestController(network, client, orderBook);
+        this.notifier = notifier;
+        this.controller = new RequestController(network, client, orderBook, notifier);
         this.msgBuilder = new MessageBuilder();
     }
 
@@ -95,6 +98,12 @@ public class ClientHandler implements Runnable {
                 case "insertLimitOrder":
                     response = handleInsertLimitOrder(values);
                     break;
+                case "insertMarketOrder":
+                    response = handleInsertMarketOrder(values);
+                    break;
+                case "insertStopOrder":
+                    response = handleInsertStopOrder(values);
+                    break;
                 default:
                     response = msgBuilder.buildResponse(103, "Operazione non supportata");
             }
@@ -148,7 +157,25 @@ public class ClientHandler implements Runnable {
             response.addProperty("orderId", -1);
             return response;
         }
-        return controller.handleInsertLimitOrder(client, values);
+        return controller.handleInsertLimitOrder(client.getUsername(), values);
+    }
+
+    private JsonObject handleInsertMarketOrder(JsonObject values) throws IOException {
+        if (!logged) {
+            JsonObject response = new JsonObject();
+            response.addProperty("orderId", -1);
+            return response;
+        }
+        return controller.handleInsertMarketOrder(client.getUsername(), values);
+    }
+
+    private JsonObject handleInsertStopOrder(JsonObject values) throws IOException {
+        if (!logged) {
+            JsonObject response = new JsonObject();
+            response.addProperty("orderId", -1);
+            return response;
+        }
+        return controller.handleInsertStopOrder(client.getUsername(), values);
     }
 
     private void logClientMessage(JsonObject request) {

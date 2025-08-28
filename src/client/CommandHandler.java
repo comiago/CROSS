@@ -1,6 +1,7 @@
 package client;
 
 import com.google.gson.JsonObject;
+import util.Regex;
 import util.Hash;
 
 public class CommandHandler {
@@ -58,13 +59,43 @@ public class CommandHandler {
                 break;
 
             case "insertlimitorder":
-                if (parts.length != 4) {
-                    throw new IllegalArgumentException("Formato: insertLimitOrder <type> <size> <price>");
+                if (parts.length != 4 ||
+                        (!parts[1].equals("ask") && !parts[1].equals("bid")) ||
+                        (!Regex.isNumber(parts[2])) ||
+                        (!Regex.isNumber(parts[3]))
+                ) {
+                    throw new IllegalArgumentException("Formato: insertLimitOrder <type: ask/bid> <size: number> <price: number>");
                 }
                 request.addProperty("operation", "insertLimitOrder");
                 values.addProperty("type", parts[1]);
                 values.addProperty("size", parts[2]);
                 values.addProperty("price", parts[3]);
+                break;
+
+            case "insertmarketorder":
+                if (parts.length != 3 ||
+                        (!parts[1].equals("ask") && !parts[1].equals("bid")) ||
+                        (!Regex.isNumber(parts[2]))
+                ) {
+                    throw new IllegalArgumentException("Formato: insertMarketOrder <type: ask/bid> <size>");
+                }
+                request.addProperty("operation", "insertMarketOrder");
+                values.addProperty("type", parts[1]);
+                values.addProperty("size", parts[2]);
+                break;
+
+            case "insertstoporder":
+                if (parts.length != 4 ||
+                        (!parts[1].equals("ask") && !parts[1].equals("bid")) ||
+                        (!Regex.isNumber(parts[2])) ||
+                        (!Regex.isNumber(parts[3]))
+                ) {
+                    throw new IllegalArgumentException("Formato: insertStopOrder <type: ask/bid> <size: number> <stop price: number>");
+                }
+                request.addProperty("operation", "insertStopOrder");
+                values.addProperty("type", parts[1]);
+                values.addProperty("size", parts[2]);
+                values.addProperty("stopPrice", parts[3]);
                 break;
 
             default:

@@ -1,21 +1,19 @@
 package model;
 
 public class ExecutedTrade {
-    private transient Client buyer;
-    private transient Client seller;
-    private String buyerName;
-    private String sellerName;
+    private String buyer;
+    private String seller;
+    private OrderType orderType;
     private Side initiatorSide; // Lato dell'ordine che ha innescato il trade (ask o bid)
     private int size;
     private int price;
     private long timestamp;
 
-    public ExecutedTrade(Client buyer, Client seller,
+    public ExecutedTrade(String buyer, String seller, OrderType orderType,
                          Side initiatorSide, int size, int price, long timestamp) {
         this.buyer = buyer;
         this.seller = seller;
-        this.buyerName = buyer.getUsername();
-        this.sellerName = seller.getUsername();
+        this.orderType = orderType;
         this.initiatorSide = initiatorSide;
         this.size = size;
         this.price = price;
@@ -23,8 +21,9 @@ public class ExecutedTrade {
     }
 
     // Getters (eventualmente anche setters, se usi Gson)
-    public Client getBuyer() { return buyer; }
-    public Client getSeller() { return seller; }
+    public String getBuyer() { return buyer; }
+    public String getSeller() { return seller; }
+    public OrderType getOrderType() { return orderType; }
     public Side getInitiatorSide() { return initiatorSide; }
     public int getSize() { return size; }
     public int getPrice() { return price; }

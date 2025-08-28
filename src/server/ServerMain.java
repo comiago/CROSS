@@ -4,6 +4,7 @@ import model.OrderBook;
 import model.ServerConfig;
 import model.Client;
 import util.ConfigFileManager;
+import util.Notifier;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -18,6 +19,7 @@ public class ServerMain {
     private static Network network;
     private static final List<Client> clients = new ArrayList<>();
     private static final OrderBook orderBook = new OrderBook();
+    private static Notifier notifier;
 
     public static void main(String[] args) {
         if(args.length != 0) {
@@ -51,6 +53,7 @@ public class ServerMain {
     private static void startServer(ServerConfig config) throws IOException {
         network = new Network(config.getServerPort(), config.getBacklog(), config.getServerAddress());
         threadPool = Executors.newFixedThreadPool(config.getMaxClients());
+        notifier = new Notifier(clients);
         System.out.printf("Server in ascolto su %s:%d (max %d client)%n",
                 config.getServerAddress(), config.getServerPort(), config.getMaxClients());
     }
@@ -61,7 +64,7 @@ public class ServerMain {
             Client client = new Client(clients.size(), clientSocket);
             clients.add(client);
 
-            ClientHandler handler = new ClientHandler(network, clientSocket, client, orderBook);
+            ClientHandler handler = new ClientHandler(network, clientSocket, client, orderBook, notifier);
             threadPool.execute(handler);
         }
     }

@@ -5,6 +5,7 @@ import model.*;
 import server.Network;
 import util.MessageBuilder;
 import util.OrderStorage;
+import util.Notifier;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -19,6 +20,7 @@ public class RequestController {
     private static UserController userController;
     private static Client client;
     private static OrderBook orderBook;
+    private static Notifier notifier;
 
     private static final Map<String, String> helpMessages = new HashMap<>();
 
@@ -33,12 +35,13 @@ public class RequestController {
         helpMessages.put("exit", "exit → Chiudi il client");
     }
 
-    public RequestController(Network network, Client client, OrderBook orderBook) {
+    public RequestController(Network network, Client client, OrderBook orderBook, Notifier notifier) {
         this.network = network;
         this.msgBuilder = new MessageBuilder();
         this.userController = new UserController();
         this.client = client;
         this.orderBook = orderBook;
+        this.notifier = notifier;
     }
 
     public JsonObject handleHelp(JsonObject request) {
@@ -127,15 +130,15 @@ public class RequestController {
         if (request.has("username") && !request.get("username").isJsonNull()) {
             username = request.get("username").getAsString();
         }
-        if (request.has("old_password") && !request.get("old_password").isJsonNull()) {
-            oldPassword = request.get("old_password").getAsString();
+        if (request.has("oldPassword") && !request.get("oldPassword").isJsonNull()) {
+            oldPassword = request.get("oldPassword").getAsString();
         }
-        if (request.has("new_password") && !request.get("new_password").isJsonNull()) {
-            newPassword = request.get("new_password").getAsString();
+        if (request.has("newPassword") && !request.get("newPassword").isJsonNull()) {
+            newPassword = request.get("newPassword").getAsString();
         }
 
         if (username.isEmpty() || oldPassword.isEmpty()) {
-            response = msgBuilder.buildResponse(105, "altri errori");
+            response = msgBuilder.buildResponse(105, "empty username or password");
             return response;
         }
         if (newPassword.isEmpty()) {
@@ -166,7 +169,7 @@ public class RequestController {
         return msgBuilder.buildResponse(100, "Connessione avvenuta con successo");
     }
 
-    public JsonObject handleInsertLimitOrder(Client client, JsonObject request) throws IOException {
+    public JsonObject handleInsertLimitOrder(String client, JsonObject request) throws IOException {
         JsonObject response = new JsonObject();
         long orderId = orderBook.generateOrderId();
         LimitOrder limitOrder = new LimitOrder(
@@ -183,15 +186,78 @@ public class RequestController {
             for (ExecutedTrade t : trades) {
                 OrderStorage.appendToExecutedOrders(t);
                 JsonObject tradesObj = new JsonObject();
-                t.getBuyer().notify(msgBuilder.buildNotification("closedTrade", tradesObj));
-                t.getSeller().notify(msgBuilder.buildNotification("closedTrade", tradesObj));
+                tradesObj.addProperty("buyer", t.getBuyer());
+                tradesObj.addProperty("seller", t.getSeller());
+                tradesObj.addProperty("orderType", t.getOrderType().toString());
+                tradesObj.addProperty("side", t.getInitiatorSide().toString());
+                tradesObj.addProperty("size", t.getSize());
+                tradesObj.addProperty("price", t.getPrice());
+                tradesObj.addProperty("timestamp", t.getTimestamp());
+                notifier.notifyTrade(t.getBuyer(), t.getSeller(), msgBuilder.buildNotification("closedTrade", tradesObj));
             }
         }
-        OrderStorage.savePendingOrders(orderBook);
+        OrderStorage.savePendingLimitOrders(orderBook);
         
         response.addProperty("orderId", orderId);
         return response;
     }
+
+    public JsonObject handleInsertMarketOrder(String client, JsonObject request) throws IOException {
+        JsonObject response = new JsonObject();
+
+        System.out.println(orderBook.getLimitAsks() + " " + orderBook.getLimitBids());
+
+        long orderId = orderBook.generateOrderId();
+        MarketOrder marketOrder = new MarketOrder(
+                orderId,
+                client,
+                Side.valueOf(request.get("type").getAsString()),
+                request.get("size").getAsInt()
+        );
+
+        List<ExecutedTrade> trades = orderBook.matchMarketOrder(marketOrder);
+
+        if (!trades.isEmpty()) {
+            for (ExecutedTrade t : trades) {
+                OrderStorage.appendToExecutedOrders(t);
+
+                JsonObject tradesObj = new JsonObject();
+                tradesObj.addProperty("buyer", t.getBuyer());
+                tradesObj.addProperty("seller", t.getSeller());
+                tradesObj.addProperty("orderType", t.getOrderType().toString());
+                tradesObj.addProperty("side", t.getInitiatorSide().toString());
+                tradesObj.addProperty("size", t.getSize());
+                tradesObj.addProperty("price", t.getPrice());
+                tradesObj.addProperty("timestamp", t.getTimestamp());
+                notifier.notifyTrade(t.getBuyer(), t.getSeller(), msgBuilder.buildNotification("closedTrade", tradesObj));
+            }
+        }
+
+        // 👇 QUI aggiorni anche il file dei pending
+        OrderStorage.savePendingLimitOrders(orderBook);
+
+        response.addProperty("orderId", orderId);
+        return response;
+    }
+
+    public JsonObject handleInsertStopOrder(String client, JsonObject request) throws IOException {
+        long orderId = orderBook.generateOrderId();
+        StopOrder stopOrder = new StopOrder(
+                orderId,
+                client,
+                Side.valueOf(request.get("type").getAsString()),
+                request.get("size").getAsInt(),
+                request.get("stopPrice").getAsInt()
+        );
+
+        orderBook.addStopOrder(stopOrder);
+        OrderStorage.savePendingStopOrders(orderBook);
+
+        JsonObject response = new JsonObject();
+        response.addProperty("orderId", orderId);
+        return response;
+    }
+
 
     // Utilità per estrarre valori da un JSON in sicurezza
     private String getSafeString(JsonObject obj, String key) {

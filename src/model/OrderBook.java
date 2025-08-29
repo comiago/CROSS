@@ -299,7 +299,7 @@ public class OrderBook {
                     allOrders.remove(so.getOrderId());
                 }
                 itBids.remove(); // rimuove la lista di quel prezzo
-            } else break; // TreeMap è ordinato, posso fermarmi
+            } else break;
         }
 
         // STOP ASKS → attivano se il prezzo di mercato <= stopPrice
@@ -320,8 +320,12 @@ public class OrderBook {
             } else break;
         }
 
+        // 👇 FIX: salva subito i pending stops aggiornati
+        OrderStorage.savePendingStopOrders(this);
+
         return triggered;
     }
+
 
 
     private ExecutedTrade createTrade(Order newOrder, Order existingOrder, int price, int size) {

@@ -1,13 +1,4 @@
 {
-  "asks": [
-    {
-      "stopPrice": 95,
-      "orderId": 2,
-      "username": "comiago",
-      "side": "ask",
-      "size": 5,
-      "timestamp": 1756400364961
-    }
-  ],
+  "asks": [],
   "bids": []
 }

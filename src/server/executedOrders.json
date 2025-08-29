@@ -3,7 +3,6 @@
     "buyer": "comiago",
     "seller": "comiago",
     "orderType": "MARKET",
-    "initiatorSide": "ask",
     "size": 5,
     "price": 100,
     "timestamp": 1756459686694
@@ -12,7 +11,6 @@
     "buyer": "comiago",
     "seller": "comiago",
     "orderType": "MARKET",
-    "initiatorSide": "ask",
     "size": 5,
     "price": 100,
     "timestamp": 1756459709847
@@ -21,9 +19,17 @@
     "buyer": "comiago",
     "seller": "comiago",
     "orderType": "MARKET",
-    "initiatorSide": "ask",
     "size": 5,
     "price": 90,
     "timestamp": 1756459730852
+  },
+  {
+    "buyer": "comiago",
+    "seller": "comiago",
+    "orderType": "MARKET",
+    "initiatorSide": "BID",
+    "size": 10,
+    "price": 100,
+    "timestamp": 1756462047083
   }
 ]

@@ -4,10 +4,15 @@ import com.google.gson.JsonObject;
 import model.Client;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
+/**
+ * Gestisce le notifiche UDP ai client connessi.
+ * Supporta notifiche a singoli, multipli o broadcast.
+ */
 public class Notifier {
+
     private final List<Client> clients;
 
     public Notifier(List<Client> clients) {
@@ -15,7 +20,12 @@ public class Notifier {
     }
 
     /**
-     * Notifica sia il buyer che il seller di una transazione
+     * Notifica buyer e seller di una transazione.
+     *
+     * @param buyerUsername  username del compratore
+     * @param sellerUsername username del venditore
+     * @param tradeNotification oggetto JSON con informazioni della transazione
+     * @throws IOException se si verifica un errore di comunicazione
      */
     public void notifyTrade(String buyerUsername, String sellerUsername, JsonObject tradeNotification) throws IOException {
         boolean buyerNotified = false;
@@ -26,37 +36,29 @@ public class Notifier {
             while (iterator.hasNext()) {
                 Client client = iterator.next();
                 try {
-                    if (client.getUsername().equals(buyerUsername)) {
+                    if (!buyerNotified && client.getUsername().equals(buyerUsername)) {
                         client.notify(tradeNotification);
                         buyerNotified = true;
                     }
-                    if (client.getUsername().equals(sellerUsername)) {
+                    if (!sellerNotified && client.getUsername().equals(sellerUsername)) {
                         client.notify(tradeNotification);
                         sellerNotified = true;
                     }
 
-                    // Se entrambi sono stati notificati, possiamo uscire prima
-                    if (buyerNotified && sellerNotified) {
-                        break;
-                    }
+                    // Esci se entrambi sono stati notificati
+                    if (buyerNotified && sellerNotified) break;
+
                 } catch (IOException e) {
-                    System.err.println("Errore notifica a client " + client.getUsername() + ", rimuovo: " + e.getMessage());
-                    iterator.remove(); // Rimuovi client disconnesso
+                    removeDisconnectedClient(iterator, client, e);
                 }
             }
         }
 
-        // Log per debugging
-        if (!buyerNotified) {
-            System.out.println("⚠ Buyer " + buyerUsername + " non connesso, notifica non inviata");
-        }
-        if (!sellerNotified) {
-            System.out.println("⚠ Seller " + sellerUsername + " non connesso, notifica non inviata");
-        }
+        logMissingNotifications(buyerUsername, sellerUsername, buyerNotified, sellerNotified);
     }
 
     /**
-     * Notifica tutti i client connessi
+     * Notifica tutti i client connessi (broadcast)
      */
     public void notifyAll(JsonObject notification) {
         synchronized (clients) {
@@ -66,15 +68,16 @@ public class Notifier {
                 try {
                     client.notify(notification);
                 } catch (IOException e) {
-                    System.err.println("Errore notifica broadcast a " + client.getUsername() + ", rimuovo: " + e.getMessage());
-                    iterator.remove();
+                    removeDisconnectedClient(iterator, client, e);
                 }
             }
         }
     }
 
     /**
-     * Notifica un client specifico per username
+     * Notifica un client specifico per username.
+     *
+     * @return true se l'utente è stato notificato correttamente, false altrimenti
      */
     public boolean notifyUser(String username, JsonObject notification) {
         synchronized (clients) {
@@ -86,8 +89,7 @@ public class Notifier {
                         client.notify(notification);
                         return true;
                     } catch (IOException e) {
-                        System.err.println("Errore notifica a " + username + ", rimuovo: " + e.getMessage());
-                        iterator.remove();
+                        removeDisconnectedClient(iterator, client, e);
                         return false;
                     }
                 }
@@ -98,7 +100,7 @@ public class Notifier {
     }
 
     /**
-     * Notifica multipli client per username
+     * Notifica multipli client per username.
      */
     public void notifyUsers(List<String> usernames, JsonObject notification) {
         synchronized (clients) {
@@ -109,8 +111,7 @@ public class Notifier {
                     try {
                         client.notify(notification);
                     } catch (IOException e) {
-                        System.err.println("Errore notifica a " + client.getUsername() + ", rimuovo: " + e.getMessage());
-                        iterator.remove();
+                        removeDisconnectedClient(iterator, client, e);
                     }
                 }
             }
@@ -118,25 +119,33 @@ public class Notifier {
     }
 
     /**
-     * Verifica se un utente è online
+     * Verifica se un utente è online.
      */
     public boolean isUserOnline(String username) {
         synchronized (clients) {
-            for (Client client : clients) {
-                if (client.getUsername().equals(username)) {
-                    return true;
-                }
-            }
+            return clients.stream().anyMatch(c -> c.getUsername().equals(username));
         }
-        return false;
     }
 
     /**
-     * Ottiene il numero di client connessi
+     * Restituisce il numero di client connessi.
      */
     public int getConnectedCount() {
         synchronized (clients) {
             return clients.size();
         }
+    }
+
+    /* ------------------- METODI PRIVATI ------------------- */
+
+    private void removeDisconnectedClient(Iterator<Client> iterator, Client client, IOException e) {
+        System.err.println("Errore notifica a client " + client.getUsername() + ", rimuovo: " + e.getMessage());
+        iterator.remove();
+    }
+
+    private void logMissingNotifications(String buyerUsername, String sellerUsername,
+                                         boolean buyerNotified, boolean sellerNotified) {
+        if (!buyerNotified) System.out.println("⚠ Buyer " + buyerUsername + " non connesso, notifica non inviata");
+        if (!sellerNotified) System.out.println("⚠ Seller " + sellerUsername + " non connesso, notifica non inviata");
     }
 }

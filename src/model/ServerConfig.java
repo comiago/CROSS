@@ -1,11 +1,14 @@
 package model;
 
+/**
+ * Classe che rappresenta la configurazione del server.
+ * Contiene indirizzo, porta, backlog e numero massimo di client.
+ */
 public class ServerConfig {
-    private String serverAddress;
-    private int serverPort;
-
-    private int backlog;
-    private int maxClients;
+    private String serverAddress; // Indirizzo/IP del server
+    private int serverPort;       // Porta TCP del server
+    private int backlog;          // Numero massimo di connessioni pendenti
+    private int maxClients;       // Numero massimo di client simultanei
 
     public String getServerAddress() {
         return serverAddress;

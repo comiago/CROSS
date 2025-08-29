@@ -1,11 +1,18 @@
 package model;
 
 /**
- * Configurazione del client: indirizzo e porta del server.
+ * Rappresenta la configurazione del client.
+ * Contiene l'indirizzo e la porta del server a cui connettersi.
  */
 public class ClientConfig {
+
+    /** Indirizzo del server (es. "localhost" o IP) */
     private String serverAddress;
+
+    /** Porta TCP del server */
     private int serverPort;
+
+    // --- Getters e Setters ---
 
     public String getServerAddress() {
         return serverAddress;

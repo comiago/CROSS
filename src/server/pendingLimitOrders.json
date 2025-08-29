@@ -1,4 +1,13 @@
 {
-  "asks": [],
+  "asks": [
+    {
+      "price": 100,
+      "orderId": 1,
+      "username": "comiago",
+      "side": "ASK",
+      "size": 10,
+      "timestamp": 1756462036749
+    }
+  ],
   "bids": []
 }
